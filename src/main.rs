@@ -4,10 +4,10 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use ratatui::{prelude::*, widgets::{canvas::Canvas, canvas::Points, Block}};
-use ratatui::symbols::Marker;
+use ratatui::prelude::*;
 
 mod states;
+mod components;
 
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -54,9 +54,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: states::App) -> io::
             match event.kind {
                 MouseEventKind::Down(_) => {}, //self.is_drawing = true,
                 MouseEventKind::Up(_) => {}, //self.is_drawing = false,
-                MouseEventKind::Drag(_) => {
-                    //self.points.push(Position::new(event.column, event.row));
-                }
+                MouseEventKind::Drag(_) => app.draw(event.column, event.row-2),
                 _ => {}
             }
         }
@@ -68,19 +66,21 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: states::App) -> io::
 pub fn ui(f: &mut Frame, app: &mut states::App) {
     let area = f.area();
 
-    let board = Canvas::default()
-        .block(Block::bordered().title("Draw here"))
-        .marker(Marker::Bar)
-        .x_bounds([0.0, f64::from(area.width)])
-        .y_bounds([0.0, f64::from(area.height)])
-        .paint(move |ctx| {
-            let points: Vec<(f64, f64)> = app.get_points().iter().map(|p| (f64::from(p.0), f64::from(p.1))).collect();
+    let layout = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(1)
+        .constraints(
+            [
+                Constraint::Length(2),
+                Constraint::Min(12),
+                Constraint::Length(1),
+                Constraint::Length(1),
+            ]
+            .as_ref(),
+        )
+        .split(area);
 
-            ctx.draw(&Points {
-                coords: &points,
-                color: Color::White,
-            });
-        });
-
-    f.render_widget(board, area);
+    components::header::render(f, app, layout[0]);
+    components::canvas::render(f, app, layout[1]);
+    components::footer::render(f, app, layout[3]);
 }
