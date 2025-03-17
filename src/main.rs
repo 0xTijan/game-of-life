@@ -44,11 +44,11 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: states::App) -> io::
             if key.kind == KeyEventKind::Press {
                 use KeyCode::*;
                 match key.code {
-                    Char('q') => return Ok(()),
-                    Char('c') => app.clear(),
+                    Char('q') => return Ok(()),  
+                    Char('c') => app.clear(),    
                     Char('e') => app.end_simulation(),
                     Char('s') => app.mode = states::Mode::Simulating,
-                    Char('t') => app.toggle_drawing(),
+                    Char('d') => app.toggle_drawing(),
                     _ => {}
                 }
             }
@@ -57,19 +57,19 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: states::App) -> io::
         // handle mouse events
         if let Event::Mouse(event) = event::read()? {
             match event.kind {
-                MouseEventKind::Down(_) => app.draw(event.column, event.row-2, true),
-                MouseEventKind::Drag(_) => app.draw(event.column, event.row-2, true),
+                MouseEventKind::Down(_) => app.draw(event.column, event.row - 2, true),  // draw when mouse is pressed
+                MouseEventKind::Drag(_) => app.draw(event.column, event.row - 2, true),  // draw while dragging
                 _ => {}
             }
         }
-        
+
+        // simulate if in simulation mode
         if app.mode == states::Mode::Simulating {
-            app.simulate(); // simulate one generation
-            std::thread::sleep(std::time::Duration::from_millis(200)); // sleep for 200ms
+            app.simulate();
+            std::thread::sleep(std::time::Duration::from_millis(200)); // sleep to control simulation speed
         }
     }
 }
-
 
 // main drawing function
 pub fn ui(f: &mut Frame, app: &mut states::App) {

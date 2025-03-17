@@ -8,7 +8,7 @@ use crate::states::App;
 pub fn render(f: &mut Frame, app: &mut App, area: Rect) {
     let board = Canvas::default()
         .block(Block::bordered().title("Simulation Board"))
-        .marker(Marker::Dot)
+        .marker(Marker::Block)
         .x_bounds([0.0, f64::from(area.width)])   // X remains the same
         .y_bounds([0.0, f64::from(area.height)])  // Y remains the same
         .paint(move |ctx| {
