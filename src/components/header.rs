@@ -1,6 +1,6 @@
 use ratatui::{prelude::*, widgets::*};
 use ratatui::style::{Modifier, Style};
-use crate::states::App;
+use crate::states::{App, Mode};
 
 pub fn render(f: &mut Frame, app: &App, area: Rect) {
     // Title centered
@@ -9,16 +9,22 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         .style(Style::default().add_modifier(Modifier::BOLD));
 
     // Status line: either "Drawing" in yellow or simulation stats
-    let status_line = if app.is_drawing {
-        vec!["Mode: ".into(), "Drawing".yellow().bold()]
-    } else {
-        vec![
-            "Mode: ".into(), "Simulating: ".to_string().green().bold(), " | ".into(),
+    let mut status_line = vec!["Mode: ".into()];
+
+    status_line.push(match app.mode {
+        Mode::Drawing => "Drawing".yellow().bold(),
+        Mode::Simulating => "Simulating".green().bold(),
+        Mode::None => "Idle".green().bold(),
+    });
+    
+    if app.mode != Mode::Drawing {
+        status_line.extend(vec![
+            " | ".into(),
             "Generation: ".into(), app.generation.to_string().green().bold(), " | ".into(),
             "Live Cells: ".into(), app.live_cells.to_string().green().bold(),
-        ]
-    };
-
+        ]);
+    }
+    
     let status = Paragraph::new(Line::from(status_line)).alignment(Alignment::Center);
 
     let chunks = Layout::default()

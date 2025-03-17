@@ -39,24 +39,33 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: states::App) -> io::
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
 
+        // handle keyboard events
         if let Event::Key(key) = event::read()? {
-            // handle keyboard events
             if key.kind == KeyEventKind::Press {
                 use KeyCode::*;
                 match key.code {
                     Char('q') => return Ok(()),
+                    Char('c') => app.clear(),
+                    Char('e') => app.end_simulation(),
+                    Char('s') => app.mode = states::Mode::Simulating,
+                    Char('t') => app.toggle_drawing(),
                     _ => {}
                 }
             }
         }
+
+        // handle mouse events
         if let Event::Mouse(event) = event::read()? {
-            // handle mouse events
             match event.kind {
-                MouseEventKind::Down(_) => {}, //self.is_drawing = true,
-                MouseEventKind::Up(_) => {}, //self.is_drawing = false,
-                MouseEventKind::Drag(_) => app.draw(event.column, event.row-2),
+                MouseEventKind::Down(_) => app.draw(event.column, event.row-2, true),
+                MouseEventKind::Drag(_) => app.draw(event.column, event.row-2, true),
                 _ => {}
             }
+        }
+        
+        if app.mode == states::Mode::Simulating {
+            app.simulate(); // simulate one generation
+            std::thread::sleep(std::time::Duration::from_millis(200)); // sleep for 200ms
         }
     }
 }

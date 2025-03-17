@@ -1,7 +1,7 @@
 use ratatui::{prelude::*, widgets::*};
 use crate::states::App;
 
-pub fn render(f: &mut Frame, app: &mut App, area: Rect) {
+pub fn render(f: &mut Frame, _app: &mut App, area: Rect) {
     let controls = vec![
         " Quit ".into(), "<Q>".green().bold(), " | ".into(),
         " Start ".into(), "<S>".green().bold(), " | ".into(),
